@@ -8,9 +8,8 @@ terraform{
 }
 
 #Tell terraform that we will use AWS provider
-provider "aws"{
-    version = "~> 0.1"
-    region = "${var.region}"
+provider "aws" {
+  region = "${var.aws_region}"
 }
 
 provider "template"{
@@ -28,12 +27,13 @@ data "terraform_remote_state" "jenkins_state" {
 }
 
 module "jenkins" {
-  source                      = "./modules/jenkins-master"
+  source                      = "./modules/jenkins"
 
   vpc_id                      = "${data.aws_vpc.default.id}"
 
-  name                        = "${var.name == "" ? "jenkins-master" : join("-", list(var.name, "jenkins-master"))}"
-  alb_prefix                  = "${var.name == "" ? "jenkins" : join("-", list(var.name, "jenkins"))}"
+  #name                        = "${var.name == "" ? "jenkins" : join("-", list(var.name, "jenkins"))}"
+  name                        = "jenkins"
+  #alb_prefix                  = "${var.name == "" ? "jenkins" : join("-", list(var.name, "jenkins"))}"
   instance_type               = "${var.instance_type_master}"
 
   ami_id                      = "${var.master_ami_id == "" ? data.aws_ami.jenkins.image_id : var.master_ami_id}"
@@ -53,8 +53,8 @@ module "jenkins" {
   app_dns_name                = "${var.app_dns_name}"
 }
 
-data "template_file" "setup_data_master" {
-  template = "${file("./modules/jenkins-master/setup.tpl")}"
+data "template_file" "setup_data" {
+  template = "${file("./modules/jenkins/setup.tpl")}"
 
   vars = {
     jnlp_port = "${var.jnlp_port}"
